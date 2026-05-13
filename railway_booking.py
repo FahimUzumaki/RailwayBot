@@ -718,8 +718,8 @@ class RailwayBookingBot:
 
 def main():
     credentials = {
-        'mobile': '01757143614',
-        'password': 'Fahim_013'
+        'mobile': '*',
+        'password': '*'
     }
 
     journey_details = {
