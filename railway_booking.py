@@ -73,7 +73,7 @@ class RailwayBookingBot:
         logger.info("Checking login status...")
 
         # ── If session cached, site redirects away from /login immediately ──
-        time.sleep(3)
+        time.sleep(1)
         if "login" not in self.driver.current_url.lower():
             logger.info("✅ Already logged in via cached session! Skipping CAPTCHA.")
             return True
@@ -280,21 +280,21 @@ class RailwayBookingBot:
             # FROM
             from_field = self.driver.find_element(By.ID, "dest_from")
             from_field.click()
-            time.sleep(1)
-            from_field.send_keys(self.journey_details['from'])
-            time.sleep(2)
-            from_field.send_keys(u'\ue015') # Down Arrow
             time.sleep(0.5)
+            from_field.send_keys(self.journey_details['from'])
+            time.sleep(1)
+            from_field.send_keys(u'\ue015') # Down Arrow
+            time.sleep(0.2)
             from_field.send_keys(u'\ue007') # Enter
 
             # TO
             to_field = self.driver.find_element(By.ID, "dest_to")
             to_field.click()
-            time.sleep(1)
-            to_field.send_keys(self.journey_details['to'])
-            time.sleep(2)
-            to_field.send_keys(u'\ue015') # Down Arrow
             time.sleep(0.5)
+            to_field.send_keys(self.journey_details['to'])
+            time.sleep(1)
+            to_field.send_keys(u'\ue015') # Down Arrow
+            time.sleep(0.2)
             to_field.send_keys(u'\ue007') # Enter
 
             # DATE
@@ -338,8 +338,8 @@ class RailwayBookingBot:
             time.sleep(0.5)
 
             # Scroll into view + JS click
-            self.driver.execute_script("arguments[0].scrollIntoView(true);", search_btn)
-            time.sleep(0.5)
+            self.driver.execute_script("arguments[0].scrollIntoView({block:'nearest'});", search_btn)
+            time.sleep(0.2)
             self.driver.execute_script("arguments[0].click();", search_btn)
 
             # Wait for results — also watch for a login modal appearing mid-flow
@@ -383,12 +383,10 @@ class RailwayBookingBot:
         logger.info(f"Selecting train: {train_name} | Class: {seat_class}...")
 
         try:
-            time.sleep(3)
-
             WebDriverWait(self.driver, 30).until(
                 EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".book-now-btn"))
             )
-            time.sleep(2)
+            time.sleep(1)
 
             # Find the correct train AND class combination
             result = self.driver.execute_script("""
@@ -446,11 +444,11 @@ class RailwayBookingBot:
                 input("Press Enter to manually select train and class...")
                 return True
 
-            self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", target_btn)
-            time.sleep(0.5)
+            self.driver.execute_script("arguments[0].scrollIntoView({block:'nearest'});", target_btn)
+            time.sleep(0.3)
             self.driver.execute_script("arguments[0].click();", target_btn)
             logger.info(f"✅ Clicked Book Now for {train_name} - {seat_class}!")
-            time.sleep(4)
+            time.sleep(1)
             return True
 
         except Exception as e:
@@ -487,7 +485,7 @@ class RailwayBookingBot:
                 // Click the parent single-seat-class block to activate it
                 let block = span.closest('.single-seat-class') || span.parentElement;
                 if (!block || block.offsetWidth === 0) continue;
-                block.scrollIntoView({block:'center'});
+                block.scrollIntoView({block:'nearest'});
                 block.click();
                 return (span.innerText || '').trim();
             }
@@ -501,7 +499,7 @@ class RailwayBookingBot:
                 let bNorm = norm(b.innerText || '');
                 if (bNorm !== targetNorm) continue;
                 if (b.offsetWidth === 0) continue;
-                b.scrollIntoView({block:'center'});
+                b.scrollIntoView({block:'nearest'});
                 b.click();
                 return (b.innerText || '').trim();
             }
@@ -524,7 +522,7 @@ class RailwayBookingBot:
             num_seats = self.journey_details.get('seats', 2)
             
             # Wait for seat layout to load
-            time.sleep(4)
+            time.sleep(1)
             logger.info("Waiting for seat layout page...")
             
             # Wait for the bogie dropdown to appear
@@ -606,16 +604,16 @@ class RailwayBookingBot:
                                 continue
                                 
                             logger.info(f"Clicking coach: {option_text}")
-                            self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", option)
+                            self.driver.execute_script("arguments[0].scrollIntoView({block:'nearest'});", option)
                             self.driver.execute_script("arguments[0].click();", option)
                             time.sleep(1)
                     except Exception:
                         # Raw WebElement (coach button)
                         try:
                             logger.info(f"Clicking coach button...")
-                            self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", option)
+                            self.driver.execute_script("arguments[0].scrollIntoView({block:'nearest'});", option)
                             self.driver.execute_script("arguments[0].click();", option)
-                            time.sleep(2)
+                            time.sleep(1)
                         except Exception as ce:
                             logger.warning(f"Coach button click failed: {ce}")
                             continue
@@ -654,12 +652,12 @@ class RailwayBookingBot:
                     if clicked_total >= num_seats:
                         break
                     try:
-                        self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", seat)
-                        time.sleep(0.3)
+                        self.driver.execute_script("arguments[0].scrollIntoView({block:'nearest'});", seat)
+                        time.sleep(0.1)
                         self.driver.execute_script("arguments[0].click();", seat)
                         clicked_total += 1
                         logger.info(f"✅ Seat {clicked_total} clicked!")
-                        time.sleep(0.5)
+                        time.sleep(0.1)
                     except Exception as se:
                         logger.warning(f"Seat click failed: {se}")
                         continue
@@ -677,7 +675,7 @@ class RailwayBookingBot:
                             "contains(translate(., 'abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), 'PROCEED')]"
                         ))
                     )
-                    self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", purchase_btn)
+                    self.driver.execute_script("arguments[0].scrollIntoView({block:'nearest'});", purchase_btn)
                     time.sleep(0.5)
                     self.driver.execute_script("arguments[0].click();", purchase_btn)
                     logger.info("✅ Purchase/Continue clicked! Proceeding to payment...")
@@ -720,16 +718,16 @@ class RailwayBookingBot:
 
 def main():
     credentials = {
-        'mobile': 'YOUR_MOBILE',
-        'password': 'YOUR_PASSWORD'
+        'mobile': '01757143614',
+        'password': 'Fahim_013'
     }
 
     journey_details = {
         'from': 'Dhaka',
-        'to': "Cox's Bazar",
-        'date': '2026-05-01',  
+        'to': "Rajshahi",
+        'date': '2026-05-20',  
         'class': 'S_CHAIR',
-        'train_name': 'COXS BAZAR EXPRESS',  
+        'train_name': 'PADMA EXPRESS',  
         'seats': 2
     }
 
